@@ -33,20 +33,61 @@ export function readRows(): void {
       "Please select a range to read from. You can select multiple rows by pressing shift and clicking."
     );
   } else {
-    const data = range.getValues();
+    // check if range is valid
+    let rangeValid = false;
+    // Make sure at least 8 Columns
 
-    for (let i = 0; i < data.length; i++) {
-      Logger.log("Item name: " + data[i][0]);
-      Logger.log("Vendor number: " + data[i][1]);
-      Logger.log("Vendor URL: " + data[i][2]);
-      Logger.log("Cost: " + data[i][3]);
-
-      Logger.log("Quantity: " + data[i][4]);
-      Logger.log("Item URL: " + data[i][5]);
-      Logger.log("Project: " + data[i][6]);
-      Logger.log("Date Needed: " + data[i][7]);
+    if (range.getNumRows() <= 12) {
+      if (range.getNumColumns() >= 8) {
+        rangeValid = true;
+        // Loop through each row and check if the Cell Notation starts with A and 8th Column is H
+        for (let j = 0; j < range.getNumRows(); j++) {
+          if (
+            !(
+              range
+                .getCell(j + 1, 1)
+                .getA1Notation()
+                .startsWith("A") &&
+              range
+                .getCell(j + 1, 8)
+                .getA1Notation()
+                .startsWith("H")
+            )
+          ) {
+            rangeValid = false;
+            SpreadsheetApp.getUi().alert(
+              "One of the rows in the selected range does include the correct column selection. 1st Column should be A and 8th Column should be H"
+            );
+          }
+        }
+      } else {
+        SpreadsheetApp.getUi().alert("Please select the entire row.");
+      }
+    } else {
+      SpreadsheetApp.getUi().alert(
+        "If you have more than 12 items, please only select 12 at a time for one vendor and repeat process for more items."
+      );
     }
-    SpreadsheetApp.getUi().alert(Logger.getLog());
+
+    if (rangeValid) {
+      for (let i = 0; i < 8; i++) {
+        Logger.log("Item name: " + range.getCell(i + 1, 1).getValue());
+        Logger.log("Vendor number: " + range.getCell(i + 1, 2).getValue());
+        Logger.log("Vendor URL: " + range.getCell(i + 1, 3).getValue());
+        Logger.log("Cost: " + range.getCell(i + 1, 4).getValue());
+
+        Logger.log("Quantity: " + range.getCell(i + 1, 5).getValue());
+        Logger.log("Item URL: " + range.getCell(i + 1, 6).getValue());
+        Logger.log("Project: " + range.getCell(i + 1, 7).getValue());
+        Logger.log("Date Needed: " + range.getCell(i + 1, 8).getValue());
+      }
+      SpreadsheetApp.getUi().alert(Logger.getLog());
+    } else {
+      //update alert
+      SpreadsheetApp.getUi().alert(
+        "You have selected invalid columns to read from. Please click a row number to select entire row."
+      );
+    }
   }
 }
 
