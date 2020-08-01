@@ -89,7 +89,7 @@ function readRows(): Array<Array<string | number>> | null {
       for (let i = 0; i < items.length; i++) {
         items[i] = new Array(8); // Create a 2d array from 1d array for each of the values.
       }
-
+      let currentRow = 0;
       for (let r = 0; r < rangeArray?.length; r++) {
         const validRange = rangeArray[r];
         for (let i = 0; i < validRange.getNumRows(); i++) {
@@ -103,14 +103,15 @@ function readRows(): Array<Array<string | number>> | null {
           // Logger.log("Item URL: " + validRange.getCell(i + 1, 6).getValue());
           // Logger.log("Project: " + validRange.getCell(i + 1, 7).getValue());
           // Logger.log("Date Needed: " + validRange.getCell(i + 1, 8).getValue());
-          items[i][0] = validRange.getCell(i + 1, 1).getValue(); // Item Name
-          items[i][1] = validRange.getCell(i + 1, 2).getValue(); // Vendor Name and Number
-          items[i][2] = validRange.getCell(i + 1, 3).getValue(); // Vendor URL
-          items[i][3] = validRange.getCell(i + 1, 4).getValue(); // Cost
-          items[i][4] = validRange.getCell(i + 1, 5).getValue(); // Quantity
-          items[i][5] = validRange.getCell(i + 1, 6).getValue(); // Item URL
-          items[i][6] = validRange.getCell(i + 1, 7).getValue(); // Project
-          items[i][7] = validRange.getCell(i + 1, 8).getValue(); // Date Needed
+          items[currentRow][0] = validRange.getCell(i + 1, 1).getValue(); // Item Name
+          items[currentRow][1] = validRange.getCell(i + 1, 2).getValue(); // Vendor Name and Number
+          items[currentRow][2] = validRange.getCell(i + 1, 3).getValue(); // Vendor URL
+          items[currentRow][3] = validRange.getCell(i + 1, 4).getValue(); // Cost
+          items[currentRow][4] = validRange.getCell(i + 1, 5).getValue(); // Quantity
+          items[currentRow][5] = validRange.getCell(i + 1, 6).getValue(); // Item URL
+          items[currentRow][6] = validRange.getCell(i + 1, 7).getValue(); // Project
+          items[currentRow][7] = validRange.getCell(i + 1, 8).getValue(); // Date Needed
+          currentRow++;
         }
       }
       return items;
@@ -149,9 +150,19 @@ export function duplicateTemplate(): void {
 }
 
 // Populate PO with data from read rows
-function populatePO(): void {
+function populatePO(data: Array<Array<string | number>>): void {
   const po = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  // get the cells that need updating
+  // Loop through each item and add proper fields
+  for (let i = 0; i < data.length; i++) {
+    po.getRange("B" + (50 + i)).setValue(data[i][0]); // Set Item Name
+    po.getRange("H" + (50 + i)).setValue(data[i][5]); // Set Link or Item No.
+    po.getRange("M" + (50 + i)).setValue(data[i][4]); // Set Qty.
+    po.getRange("O" + (50 + i)).setValue(data[i][3]); // Set Cost
+  }
+  po.getRange("M38").setValue(data[0][7]); // Set Need by Date. Should be the same for all items. (Validated before)
+  po.getRange("J42").setValue(data[0][1]); // Set Vendor Name. Should be the same for all items. (Validated before)
+  po.getRange("J44").setValue(data[0][2]); // Set Vendor URL. Should be the same for all items. (Validated before)
+  po.getRange("F14").setValue(data[0][6]); // Set Vendor URL. Should be the same for all items. (Validated before)
 }
 
 export function createNewPO(): void {
@@ -160,12 +171,12 @@ export function createNewPO(): void {
   // Populate New PO.
   const data = readRows();
   if (data !== null) {
-    duplicateTemplate();
+    duplicateTemplate(); // Duplicates PO and sets active sheet to new PO
     // Logger.log(data);
     // SpreadsheetApp.getUi().alert(Logger.getLog());
 
     // Populate PO with Items.
-    populatePO();
+    populatePO(data);
   } else {
     console.warn("Data is NULL");
   }
