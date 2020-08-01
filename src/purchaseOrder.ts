@@ -77,6 +77,7 @@ function readRows(): Array<Array<string | number>> | null {
         }
       }
     }
+    // Check if more than 12 rows because that's the max for 1 PO
     if (numberOfRows > 12) {
       SpreadsheetApp.getUi().alert(
         "If you have more than 12 items, please only select 12 at a time for one vendor and repeat process for more items."
@@ -93,16 +94,6 @@ function readRows(): Array<Array<string | number>> | null {
       for (let r = 0; r < rangeArray?.length; r++) {
         const validRange = rangeArray[r];
         for (let i = 0; i < validRange.getNumRows(); i++) {
-          // Logger.log("Item name: " + validRange.getCell(i + 1, 1).getValue());
-          // Logger.log(
-          //   "Vendor number: " + validRange.getCell(i + 1, 2).getValue()
-          // );
-          // Logger.log("Vendor URL: " + validRange.getCell(i + 1, 3).getValue());
-          // Logger.log("Cost: " + validRange.getCell(i + 1, 4).getValue());
-          // Logger.log("Quantity: " + validRange.getCell(i + 1, 5).getValue());
-          // Logger.log("Item URL: " + validRange.getCell(i + 1, 6).getValue());
-          // Logger.log("Project: " + validRange.getCell(i + 1, 7).getValue());
-          // Logger.log("Date Needed: " + validRange.getCell(i + 1, 8).getValue());
           items[currentRow][0] = validRange.getCell(i + 1, 1).getValue(); // Item Name
           items[currentRow][1] = validRange.getCell(i + 1, 2).getValue(); // Vendor Name and Number
           items[currentRow][2] = validRange.getCell(i + 1, 3).getValue(); // Vendor URL
@@ -135,13 +126,14 @@ export function duplicateTemplate(): void {
     SpreadsheetApp.getUi().alert("Sheet 'Template PO' Not Found");
     return;
   }
+  // Get the current Date and Format to Rename PO
   const date = new Date();
   const dateString = date.toLocaleString("en-us", {
     year: "numeric",
     month: "numeric",
     day: "numeric",
   });
-  spreadsheet.duplicateActiveSheet();
+  spreadsheet.duplicateActiveSheet(); // Create copy of Template
   try {
     spreadsheet.renameActiveSheet(dateString + " IEEE USF PO");
   } catch (error) {
@@ -172,12 +164,14 @@ export function createNewPO(): void {
   const data = readRows();
   if (data !== null) {
     duplicateTemplate(); // Duplicates PO and sets active sheet to new PO
+
+    // Uncomment below to see what data is.
     // Logger.log(data);
     // SpreadsheetApp.getUi().alert(Logger.getLog());
 
     // Populate PO with Items.
     populatePO(data);
   } else {
-    console.warn("Data is NULL");
+    SpreadsheetApp.getUi().alert("Data returned is NULL");
   }
 }

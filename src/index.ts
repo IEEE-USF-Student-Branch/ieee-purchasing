@@ -1,7 +1,7 @@
 // You can access any of the global GAS objects in this file. You can also
 // import local files or external dependencies:
 import { helloWorld } from "./example";
-import * as CM from "./customMenu";
+import * as PO from "./purchaseOrder";
 
 console.log(helloWorld);
 
@@ -19,7 +19,7 @@ export function onOpen(
     | GoogleAppsScript.Events.FormsOnOpen
 ): void {
   console.log(e);
-  CM.createMenu();
+  PO.createMenu();
 }
 
 export function onEdit(e: GoogleAppsScript.Events.SheetsOnEdit): void {
@@ -44,7 +44,7 @@ global.onInstall = onInstall;
 global.doPost = doPost;
 global.doGet = doGet;
 // Be sure to define all custom functions as global variables
-global.downloadSheet = CM.downloadSheet;
-global.sendEmail = CM.sendEmail;
-global.createNewPO = CM.createNewPO;
-global.duplicateTemplate = CM.duplicateTemplate;
+global.downloadSheet = PO.downloadSheet;
+global.sendEmail = PO.sendEmail;
+global.createNewPO = PO.createNewPO;
+global.duplicateTemplate = PO.duplicateTemplate;
