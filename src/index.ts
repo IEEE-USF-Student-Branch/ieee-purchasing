@@ -46,5 +46,5 @@ global.doGet = doGet;
 // Be sure to define all custom functions as global variables
 global.downloadSheet = CM.downloadSheet;
 global.sendEmail = CM.sendEmail;
-global.readRows = CM.readRows;
+global.createNewPO = CM.createNewPO;
 global.duplicateTemplate = CM.duplicateTemplate;

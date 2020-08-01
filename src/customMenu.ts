@@ -6,7 +6,7 @@ export function createMenu(): void {
     .addItem("Duplicate Template P.O.", "duplicateTemplate")
     .addItem("Download Rows to PDF Purchase Form", "downloadSheet")
     .addSeparator()
-    .addItem("Read Row", "readRows")
+    .addItem("Create a new PO", "createNewPO")
     .addSeparator()
     .addItem("Send Email to Treasurer", "sendEmail")
     .addToUi();
@@ -26,7 +26,7 @@ export function sendEmail(): void {
     .alert("You clicked the send email item!");
 }
 
-export function readRows(): void {
+function readRows(): Array<Array<string | number>> | null {
   const sheet = SpreadsheetApp.getActiveSheet();
   const rangeList = sheet.getActiveRangeList();
   let rangeArray;
@@ -84,25 +84,42 @@ export function readRows(): void {
       rangeValid = false;
     }
     if (rangeValid) {
+      // Create a 1d array with number of rows as columns
+      const items = new Array(numberOfRows);
+      for (let i = 0; i < items.length; i++) {
+        items[i] = new Array(8); // Create a 2d array from 1d array for each of the values.
+      }
+
       for (let r = 0; r < rangeArray?.length; r++) {
         const validRange = rangeArray[r];
         for (let i = 0; i < validRange.getNumRows(); i++) {
-          Logger.log("Item name: " + validRange.getCell(i + 1, 1).getValue());
-          Logger.log(
-            "Vendor number: " + validRange.getCell(i + 1, 2).getValue()
-          );
-          Logger.log("Vendor URL: " + validRange.getCell(i + 1, 3).getValue());
-          Logger.log("Cost: " + validRange.getCell(i + 1, 4).getValue());
-
-          Logger.log("Quantity: " + validRange.getCell(i + 1, 5).getValue());
-          Logger.log("Item URL: " + validRange.getCell(i + 1, 6).getValue());
-          Logger.log("Project: " + validRange.getCell(i + 1, 7).getValue());
-          Logger.log("Date Needed: " + validRange.getCell(i + 1, 8).getValue());
+          // Logger.log("Item name: " + validRange.getCell(i + 1, 1).getValue());
+          // Logger.log(
+          //   "Vendor number: " + validRange.getCell(i + 1, 2).getValue()
+          // );
+          // Logger.log("Vendor URL: " + validRange.getCell(i + 1, 3).getValue());
+          // Logger.log("Cost: " + validRange.getCell(i + 1, 4).getValue());
+          // Logger.log("Quantity: " + validRange.getCell(i + 1, 5).getValue());
+          // Logger.log("Item URL: " + validRange.getCell(i + 1, 6).getValue());
+          // Logger.log("Project: " + validRange.getCell(i + 1, 7).getValue());
+          // Logger.log("Date Needed: " + validRange.getCell(i + 1, 8).getValue());
+          items[i][0] = validRange.getCell(i + 1, 1).getValue(); // Item Name
+          items[i][1] = validRange.getCell(i + 1, 2).getValue(); // Vendor Name and Number
+          items[i][2] = validRange.getCell(i + 1, 3).getValue(); // Vendor URL
+          items[i][3] = validRange.getCell(i + 1, 4).getValue(); // Cost
+          items[i][4] = validRange.getCell(i + 1, 5).getValue(); // Quantity
+          items[i][5] = validRange.getCell(i + 1, 6).getValue(); // Item URL
+          items[i][6] = validRange.getCell(i + 1, 7).getValue(); // Project
+          items[i][7] = validRange.getCell(i + 1, 8).getValue(); // Date Needed
         }
       }
+      return items;
+    } else {
+      return null;
     }
+  } else {
+    return null;
   }
-  SpreadsheetApp.getUi().alert(Logger.getLog());
 }
 
 // TODO: Add data validation
@@ -128,5 +145,28 @@ export function duplicateTemplate(): void {
     spreadsheet.renameActiveSheet(dateString + " IEEE USF PO");
   } catch (error) {
     spreadsheet.toast("SheetName already taken. Please rename manually.");
+  }
+}
+
+// Populate PO with data from read rows
+function populatePO(): void {
+  const po = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  // get the cells that need updating
+}
+
+export function createNewPO(): void {
+  // Read Rows and save to an array of values.
+  // Duplicate Template PO
+  // Populate New PO.
+  const data = readRows();
+  if (data !== null) {
+    duplicateTemplate();
+    // Logger.log(data);
+    // SpreadsheetApp.getUi().alert(Logger.getLog());
+
+    // Populate PO with Items.
+    populatePO();
+  } else {
+    console.warn("Data is NULL");
   }
 }
