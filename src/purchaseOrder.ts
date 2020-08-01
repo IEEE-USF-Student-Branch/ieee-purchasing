@@ -22,6 +22,8 @@ export function downloadSheet(): void {
 }
 
 export function sendEmail(): void {
+  // Work on Creating new sheet, from one of the pages, send email, and delete sheet.
+  // The sendEmail method has an optional overload to send a file BLOB
   MailApp.sendEmail(
     "ieee.usf.tampa@gmail.com",
     "PO Email",
