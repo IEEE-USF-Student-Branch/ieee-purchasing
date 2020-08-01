@@ -22,8 +22,11 @@ export function downloadSheet(): void {
 }
 
 export function sendEmail(): void {
-  SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
-    .alert("You clicked the send email item!");
+  MailApp.sendEmail(
+    "ieee.usf.tampa@gmail.com",
+    "PO Email",
+    "Here is a PO from IEEE Purchasing Portal. Ignore this email."
+  );
 }
 
 function readRows(): Array<Array<string | number>> | null {
