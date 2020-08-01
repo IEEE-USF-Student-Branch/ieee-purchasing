@@ -3,6 +3,7 @@ export function createMenu(): void {
   const ui = SpreadsheetApp.getUi();
   // Or DocumentApp or FormApp.
   ui.createMenu("Custom Menu")
+    .addItem("Duplicate Template P.O.", "duplicateTemplate")
     .addItem("Download Rows to PDF Purchase Form", "downloadSheet")
     .addSeparator()
     .addItem("Read Row", "readRows")
@@ -105,3 +106,27 @@ export function readRows(): void {
 }
 
 // TODO: Add data validation
+
+// Method to duplicate the template PO and rename with Current Date
+export function duplicateTemplate(): void {
+  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  const template = spreadsheet.getSheetByName("Template PO");
+  if (template !== null) {
+    spreadsheet.setActiveSheet(template);
+  } else {
+    SpreadsheetApp.getUi().alert("Sheet 'Template PO' Not Found");
+    return;
+  }
+  const date = new Date();
+  const dateString = date.toLocaleString("en-us", {
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+  });
+  spreadsheet.duplicateActiveSheet();
+  try {
+    spreadsheet.renameActiveSheet(dateString + " IEEE USF PO");
+  } catch (error) {
+    spreadsheet.toast("SheetName already taken. Please rename manually.");
+  }
+}

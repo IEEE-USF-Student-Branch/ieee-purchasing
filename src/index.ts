@@ -47,3 +47,4 @@ global.doGet = doGet;
 global.downloadSheet = CM.downloadSheet;
 global.sendEmail = CM.sendEmail;
 global.readRows = CM.readRows;
+global.duplicateTemplate = CM.duplicateTemplate;
