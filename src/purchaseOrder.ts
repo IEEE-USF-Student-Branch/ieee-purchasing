@@ -22,13 +22,50 @@ export function downloadSheet(): void {
 }
 
 export function sendEmail(): void {
-  // Work on Creating new sheet, from one of the pages, send email, and delete sheet.
-  // The sendEmail method has an optional overload to send a file BLOB
-  MailApp.sendEmail(
-    "ieee.usf.tampa@gmail.com",
-    "PO Email",
-    "Here is a PO from IEEE Purchasing Portal. Ignore this email."
+  // Set the Active Spreadsheet so we don't forget
+  const originalSpreadsheet = SpreadsheetApp.getActive();
+
+  // Set the message to attach to the email.
+  const message =
+    "Here is a PO from IEEE Purchasing Portal. Ignore this email.";
+
+  // Get template to pull officer's email from.
+  // const template = originalSpreadsheet.getSheetByName("Template PO");
+  const emailTo = "ieeeusfchair@gmail.com"; // template?.getRange("I7").getValue();
+  const projectName = "Robotics"; //template?.getRange("F14").getValue();
+
+  // Create a dummy new spreadsheet (to be deleted later) and copy PO (must be called on active sheet.)
+  const newSpreadsheet = SpreadsheetApp.create(
+    projectName + " purchase order to export"
   );
+  let sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+
+  sheet = originalSpreadsheet.getActiveSheet();
+  sheet.copyTo(newSpreadsheet);
+
+  // Find and delete the default "Sheet 1", after the copy to avoid triggering an apocalypse
+  newSpreadsheet.getSheetByName("Sheet1")?.activate();
+  newSpreadsheet.deleteActiveSheet();
+
+  try {
+    SpreadsheetApp.getUi().alert(newSpreadsheet.getId());
+    // Make the PDF
+    const file = DriveApp.getFileById(newSpreadsheet.getId());
+
+    const theBlob = file.getBlob().getAs("application/pdf").setName("name");
+    // Old Comment
+    // Work on Creating new sheet, from one of the pages, send email, and delete sheet.
+    // The sendEmail method has an optional overload to send a file BLOB
+
+    MailApp.sendEmail(emailTo, projectName + " PO ", message, {
+      attachments: [theBlob],
+    });
+
+    // Delete the wasted sheet we created, so our Drive stays tidy.
+    DriveApp.getFileById(newSpreadsheet.getId()).setTrashed(true);
+  } catch (e) {
+    SpreadsheetApp.getUi().alert(e);
+  }
 }
 
 function readRows(): Array<Array<string | number>> | null {
@@ -159,7 +196,7 @@ function populatePO(data: Array<Array<string | number>>): void {
   po.getRange("M38").setValue(data[0][7]); // Set Need by Date. Should be the same for all items. (Validated before)
   po.getRange("J42").setValue(data[0][1]); // Set Vendor Name. Should be the same for all items. (Validated before)
   po.getRange("J44").setValue(data[0][2]); // Set Vendor URL. Should be the same for all items. (Validated before)
-  po.getRange("F14").setValue(data[0][6]); // Set Vendor URL. Should be the same for all items. (Validated before)
+  po.getRange("F14").setValue(data[0][6]); // Set Project Name. Should be the same for all items. (Validated before)
 }
 
 export function createNewPO(): void {
